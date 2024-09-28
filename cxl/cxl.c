@@ -80,6 +80,7 @@ static struct cmd_struct commands[] = {
 	{ "disable-region", .c_fn = cmd_disable_region },
 	{ "destroy-region", .c_fn = cmd_destroy_region },
 	{ "monitor", .c_fn = cmd_monitor },
+	{ "sanitize-memdev", .c_fn = cmd_sanitize_memdev },
 };
 
 int main(int argc, const char **argv)
