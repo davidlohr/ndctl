@@ -42,3 +42,4 @@ include::../copyright.txt[]
 SEE ALSO
 --------
 linkcxl:cxl-list[1],
+linkcxl:cxl-list[1],

@@ -35,6 +35,8 @@ static struct parameters {
 	bool align;
 	bool cancel;
 	bool wait;
+	bool sanitize;
+	bool secure_erase;
 	const char *type;
 	const char *size;
 	const char *decoder_filter;
@@ -160,6 +162,10 @@ OPT_STRING('\0', "pmem-err-alert",                                            \
 	   &param.corrected_pmem_err_alert, "'on' or 'off'",                  \
 	   "enable or disable corrected pmem error warning alert")
 
+#define SANITIZE_OPTIONS()			      \
+OPT_BOOLEAN('e', "secure-erase", &param.secure_erase, \
+	    "Secure Erase a memdev")
+
 #define WAIT_SANITIZE_OPTIONS()                \
 OPT_INTEGER('t', "timeout", &param.timeout,    \
 	    "time in milliseconds to wait for overwrite completion (default: infinite)")
@@ -223,6 +229,12 @@ static const struct option update_fw_options[] = {
 static const struct option set_alert_options[] = {
 	BASE_OPTIONS(),
 	SET_ALERT_OPTIONS(),
+	OPT_END(),
+};
+
+static const struct option sanitize_options[] = {
+	BASE_OPTIONS(),
+	SANITIZE_OPTIONS(),
 	OPT_END(),
 };
 
@@ -772,6 +784,22 @@ out_err:
 	return rc;
 }
 
+static int action_sanitize_memdev(struct cxl_memdev *memdev,
+				  struct action_context *actx)
+{
+	int rc = 0;
+
+	if (cxl_memdev_is_enabled(memdev))
+		return -EBUSY;
+
+	if (param.secure_erase)
+		rc = cxl_memdev_sanitize(memdev, "erase");
+        else
+		rc = cxl_memdev_sanitize(memdev, "sanitize");
+
+	return rc;
+}
+
 static int action_wait_sanitize(struct cxl_memdev *memdev,
 				struct action_context *actx)
 {
@@ -1224,6 +1252,19 @@ int cmd_set_alert_config(int argc, const char **argv, struct cxl_ctx *ctx)
 		"cxl set-alert-config <mem0> [<mem1>..<memN>] [<options>]");
 	log_info(&ml, "set alert configuration for %d mem%s\n",
 		 count >= 0 ? count : 0, count > 1 ? "s" : "");
+
+	return count >= 0 ? 0 : EXIT_FAILURE;
+}
+
+int cmd_sanitize_memdev(int argc, const char **argv, struct cxl_ctx *ctx)
+{
+	int count = memdev_action(
+		argc, argv, ctx, action_sanitize_memdev, sanitize_options,
+		"cxl sanitize-memdev <mem0> [<mem1>..<memn>] [<options>]");
+
+	log_info(&ml, "sanitize %s on %d mem device%s\n",
+		 count >= 0 ? "completed/started" : "failed",
+		 count >= 0 ? count : 0,  count > 1 ? "s" : "");
 
 	return count >= 0 ? 0 : EXIT_FAILURE;
 }

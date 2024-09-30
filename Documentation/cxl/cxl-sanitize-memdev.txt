@@ -1,0 +1,52 @@
+// SPDX-License-Identifier: GPL-2.0
+
+cxl-sanitize-memdev(1)
+======================
+
+NAME
+----
+cxl-sanitize-memdev - Perform a cryptographic destruction or sanitization
+of the contents of the given memdev(s).
+
+SYNOPSIS
+--------
+[verse]
+'cxl sanitize-memdev <mem0> [<mem1>..<memN>] [<options>]'
+
+DESCRIPTION
+-----------
+The 'sanitize-memdev' command performs two different methods of sanitization,
+per the CXL 3.0+ specification. The default is 'sanitize', but additionally,
+a 'secure-erase' option is available. It is required that the memdev be
+disabled before sanitizing, such that the device cannot be actively decoding
+any HPA ranges at the time.
+
+A device Sanitize is meant to securely re-purpose or decommission it. This
+is done by ensuring that all user data and meta data, whether it resides
+in persistent capacity, volatile capacity, or the label storage area,
+is made permanently unavailable by whatever means is appropriate for
+the media type. This sanitization request is merely submitted to the
+kernel, and the completion is asynchronous. Depending on the medium and
+capacity, sanitize may take tens of minutes to many hours. Subsequently,
+'cxl wait-sanitize’ can be used to wait for the memdevs that are under
+the sanitization.
+
+OPTIONS
+-------
+
+include::bus-option.txt[]
+
+-e::
+--secure-erase::
+	Erase user data by changing the media encryption keys for all user
+	data areas of the device.
+
+include::verbose-option.txt[]
+
+include::../copyright.txt[]
+
+SEE ALSO
+--------
+linkcxl:cxl-wait-sanitize[1],
+linkcxl:cxl-disable-memdev[1],
+linkcxl:cxl-list[1],

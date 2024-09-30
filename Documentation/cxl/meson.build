@@ -49,6 +49,7 @@ cxl_manpages = [
   'cxl-monitor.txt',
   'cxl-update-firmware.txt',
   'cxl-set-alert-config.txt',
+  'cxl-sanitize-memdev.txt',
   'cxl-wait-sanitize.txt',
 ]
 

@@ -45,7 +45,7 @@ count=${#active_mem[@]}
 set_timeout ${active_mem[0]} 2000
 
 # sanitize with an active memdev should fail
-echo 1 > /sys/bus/cxl/devices/${active_mem[0]}/security/sanitize && err $LINENO
+"$CXL" sanitize-memdev ${active_mem[0]} && err $LINENO
 
 # find an inactive mem
 inactive=""
@@ -67,7 +67,7 @@ done
 # secounds
 set_timeout $inactive 3000
 start=$SECONDS
-echo 1 > /sys/bus/cxl/devices/${inactive}/security/sanitize &
+"$CXL" sanitize-memdev $inactive || err $LINENO
 "$CXL" wait-sanitize $inactive || err $LINENO
 ((SECONDS > start + 2)) || err $LINENO
 
